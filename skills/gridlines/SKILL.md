@@ -1,149 +1,95 @@
 ---
 name: gridlines
-description: Draw vertical guide lines down an interface, find every item that misses its line, and fix paddings so sidebars, toolbars, panels, menus, dialogs and tables share a small set of edges. Covers icon columns, text lines, box lines, section headers, nested items, trailing columns, toolbar center lines and optical corrections, after Karri Saarinen's redraw of the Linear sidebar. Use it for "align this", "fix the padding", "the margins are off", "edges don't line up", "do the gridline exercise", "margin exercise", "alignment pass", "optical alignment", "sidebar alignment", "toolbar alignment", "icon column", or when a layout "looks off" and the cause is edges. Not for row heights, section spacing or a scored design pass (use design-hillclimb).
+description: Draw vertical guide lines down an interface, find every item that misses its line, and fix paddings so sidebars, toolbars, panels, menus, dialogs and tables share a small set of edges. Use it for "align this", "fix the padding", "the margins are off", "edges don't line up", "do the gridline exercise", "alignment pass", "optical alignment", "icon column", or when a layout "looks off" and the cause is edges. Not for row heights, section spacing or a scored design pass (use design-hillclimb).
 ---
 
 # Gridlines
 
-Draw the lines first, then move the items. An alignment pass done by eye drifts by 2 to 4px per panel and nobody can say which edge was meant. Done with guides, every container ends up with two or three named lines, and every item either sits on one or has a written reason not to.
+Draw the guide lines first, then move the items. When you're done, every container has two or three named lines, and every item sits on one or has a written reason not to. The model is Karri Saarinen's redraw of the Linear sidebar: one line through the icons, one through the labels, one through every trailing item.
 
-Source: Karri Saarinen's redraw of the Linear sidebar (dashed guides through the traffic lights, icon column, label line and trailing column) and his rules: rhythm is either edge positioning or centering, the top bar is centered on the window controls, the side panel has one padding with icons on one column, and shapes are either round or rectangular. Apple's HIG layout chapter is the backing reference: consistent margins, one alignment per group, controls centered on the toolbar line.
+**Scope:** horizontal edges and the vertical center of rows, on the pages the user named and every overlay those pages own. It's a padding pass, so leave these alone:
 
-This skill owns horizontal edges and the vertical center of rows. Row height and section spacing follow the project's density rules; hit areas and type size belong to other skills.
+- Row heights, hit areas and control sizes the policy approves. If closing a gap needs one of them, leave the gap, note its size, and ask.
+- Semantic elements and behavior.
+- Colors, type sizes, radii and section spacing.
 
-## Before you start
+## Steps
 
-1. Read the project's design policy. If it records edge lines (for example "text sits 16px in, controls 8px in"), those values are the target. Do not re-derive them and do not change them without the owner's approval.
-2. Run the app locally and use real data where possible. Empty and logged-out states hide most of the rows that misalign. If you can only see empty states, say so in the report.
+1. **Read the policy.** Find the project's design policy (`DESIGN.md`, or the design rules in `AGENTS.md` or `CLAUDE.md`). Edge lines it records ("text sits 16px in, controls 8px in") are the target. Don't re-derive them, and don't change them without the owner's approval.
+2. **Run the app locally with real data.** Empty and logged-out states hide most of the rows that misalign. If you can only reach empty states, say so in the report.
+3. **Draw.** Measure every page, and every overlay it owns (menus, selects, popovers, dialogs, sheets, the command palette), at 1440px and at 390px. Two ways:
+   - Headless, once per width and state:
+     ```sh
+     PW_DIR=<dir with playwright> TAG=<state> node <this skill's folder>/scripts/audit.mjs <url> .agents/gridlines <width> [prep.mjs]
+     ```
+     `prep.mjs` default-exports `async (page) => {}` that opens the overlay, switches the tab or signs in. `TAG` names an overlay state, so its capture doesn't overwrite the page's. Exit 0 means every row is on its lines, 1 means a row missed, 2 means it couldn't measure. If Playwright is missing, install it into a scratch folder, never the project. The script header lists the other options.
+   - In a live browser: run `scripts/probe.js` in the page with the browser tool's evaluate, call `window.__gridlines()`, read `lines` and `outliers` for each container it returns, and take a screenshot.
 
-## Process
+   Keep captures in `.agents/gridlines/`, with a `.gitignore` holding `*` in that folder.
+4. **Read the output.** Each `##` block is one container and its six lines: lead (first ink of a text row), box, icon center, label (first text after a leading icon), trailing and trailing center. Leading values count from the container's left edge, trailing values from its right. On the capture, lead and label are solid red, box is faint red, icon center fainter red, trailing blue and trailing center amber.
+   - `MISS y<row> <edge>: <measured>px vs <line>px <item>` is a row off its line. The edge is `leading`, `label`, `icon-column`, `trailing` or `vertical-center`. For `vertical-center`, the first number is how far apart the row's item centers are.
+   - The probe measures ink: a text run's bounds, an icon's SVG box, and the box itself for a control with a fill, full border or shadow.
+   - Confirm every miss on the capture before acting on it. The probe groups items into rows by center and can put one in the wrong row.
+   - A container with no `##` block wasn't measured. The probe looks only inside `aside`, `nav`, `header`, `section`, `article`, dialogs, menus, listboxes and cards, so set `CONTAINERS='<css selectors>'` for anything else. No blocks at all is not a pass, even though the exit code is 0.
+5. **Decide each container's lines.** Take the first that applies:
+   1. The line the policy names.
+   2. The neighbor's line, when the container shares an edge with it (stacked panels, a toolbar over a table).
+   3. The line most rows already sit on.
 
-Walk these steps in order on every page, panel and overlay in scope.
-
-### 1. Draw
-
-Inject `scripts/probe.js` and call `window.__gridlines()`. Two ways:
-
-- **Headless:** `PW_DIR=<dir with playwright> node <this skill's folder>/scripts/audit.mjs <url> .agents/gridlines [width] [prep.mjs]`. It exits 1 when any row misses its line and 2 when it couldn't measure. If Playwright is missing, install it into a scratch folder (`npm i --prefix <scratch> playwright`) and point `PW_DIR` there. If its browser isn't downloaded, run `npx playwright install chromium`, or set `CHROMIUM_PATH` to an existing Chromium build. A `prep.mjs` exporting `async (page) => {}` opens the menu, tab or dialog to measure.
-- **Live browser:** paste `scripts/probe.js` into the page with the browser tool's evaluate, then call `window.__gridlines()`.
-
-Measure at 1440px and at 390px. Open every overlay the page owns: menus, selects, popovers, dialogs, sheets, the command palette. Save every capture under `.agents/gridlines/` in the project and keep that folder out of version control.
-
-The probe measures ink, not boxes: a text run's glyph bounds, an icon's SVG bounds, and for a boxed control (fill, full border or shadow) the box itself. It draws, per container: the **lead line** (first ink in text rows) and the **label line** (first text after a leading icon) in solid red, the **box line** in faint red, the **icon-column center** in fainter red, the **trailing line** in blue, and the **trailing center** in amber.
-
-### 2. Read
-
-For each container, write down its lines from the summary: lead, box, icon center, label, trailing, trailing center. Then list every `MISS` row: which item, which edge (`leading`, `label`, `icon-column`, `trailing`, `vertical-center`), how far off, which line it should be on. Look at the capture too; the probe groups rows by center and can mis-assign an item, so confirm each miss by eye before acting on it.
-
-### 3. Decide the lines
-
-For each container, walk this tree:
-
-```
-Does the project policy name this container's lines?
-├── Yes → use them. Stop.
-└── No
-    ├── Does it share an edge with a neighbor (stacked panels, toolbar over table)?
-    │   └── Yes → take the neighbor's line. Shared edges get one line.
-    └── No → take the line most rows already sit on. Move the minority.
-```
-
-Then classify every row as edge-positioned or centered. A row is never in between: an item that sits 3px off-center and 5px off the edge belongs to neither and reads as a mistake.
-
-### 4. Fix
-
-- Move the outlier, never the majority. If 9 rows sit at 8px and the tab strip sits at 20px, the tab strip moves.
-- Fix in the container: its padding, or a shared inset variable (`--row-inset`, `--table-inset`) that the rows and the header both read. Never fix with a one-off margin on a single item (`ml-[3px]`), because the next row added to that container will miss again.
-- Use the project's spacing tokens. If the line needs a value off the scale, the container's padding is wrong, not the scale.
-- When you remove a padding someone chose on purpose (a code comment explains it), update the comment with the new reason.
-
-### 5. Re-draw
-
-Run the probe again on the same states. Pass: every item within 1px of its line. The 1px allowance is the glyph's side bearing; 2px or more is a miss. Check the 390px width did not break: wrapped toolbars must still end on the trailing line.
-
-### 6. Record and report
-
-Record any new line in the project's design policy, in the same section as the existing edge rules, with the date and who set it. Report a table per page, the guide captures inline, and a "not covered" list: states you could not reach, and gaps you left on purpose.
+   Then mark every row as edge-positioned or centered. A row is never in between. "Where the lines go" below says which items belong on which line.
+6. **Fix.**
+   - Move the outlier, never the majority. If 9 rows sit at 8px and the tab strip at 20px, the tab strip moves.
+   - Change the container's padding, or a shared inset variable (`--row-inset`) that the rows and the header both read. Never add a one-off margin to one item (`ml-[3px]`): the next row added will miss again.
+   - Use the project's spacing tokens. If the line needs a value off the scale, the container's padding is wrong, not the scale.
+   - When you remove a padding that a code comment explains, update the comment with the new reason.
+7. **Re-draw** the same states at both widths. Pass: every item is within 1px of its line, and at 390px wrapped toolbars still end on the trailing line. Repeat steps 4 to 7 until it passes. A miss that survives two rounds, or needs something outside the scope, goes under "not covered" with its size. Don't nudge the single item.
+8. **Record and report.** Add any new line to the design policy, in the section with the existing edge rules, with the date and who set it. If the project has no design policy, list the lines in the report and don't create one. Report a table per page, the guide captures inline, and a "not covered" list: states you couldn't reach, and gaps you left on purpose.
 
 ```
 Issues page, 1440 and 390
-| Where              | Before                   | After                     |
-| Sidebar, Views row | icon and label 3px right | on the 24px icon column   |
-| Sidebar, Teams     | count 4px off trailing   | on the 16px trailing line |
-| Toolbar            | title 4.5px above center | one center line           |
+| Where              | Before                   | After                   |
+| Sidebar, Views row | icon and label 3px right | on the 24px icon column |
+| Toolbar            | title 4.5px above center | one center line         |
 Not covered: the command palette (needs sign-in), the empty inbox.
 ```
 
-## The rules
+## Where the lines go
 
-### Two leading lines per container: text and box
+### Text line and box line
 
-Every container has one **text line** (labels, headings, values, bare icons) and at most one **box line** (buttons, selects, inputs, pills, chips). When a boxed control sits at the edge, inset the box so its own label lands on the text line: box line = text line minus the box's horizontal padding. With a 16px text line and 8px button padding, the box sits at 8px and nests in the corner while its label continues the text above it.
+Each container has one text line (labels, headings, values, bare icons) and at most one box line (buttons, selects, inputs, pills, chips). Inset a boxed control at the edge so its own label lands on the text line: box line = text line minus the box's horizontal padding. With a 16px text line and 8px button padding, the box sits at 8px. The probe doesn't measure a label inside a box, so check that sum yourself.
 
-Why: readers track the text, not the boxes. A box aligned to the text line pushes its label inward and breaks the column; a box nested in the corner keeps the column.
+### Sidebars and lists
 
-### Sidebars and lists: icon column, then text line
+- **Icons sit on one column:** left-aligned on the box line, or centered on one vertical line. Pick one per sidebar. Icons of different widths (a 14px dot beside a 20px glyph) center on the column, or the labels after them stagger.
+- **Labels start on one text line,** after the icon column plus the gap, in every row: nav items, the workspace switcher, favorites, teams.
+- **Section headers start on the icon column's leading edge,** not on the label line.
+- **Nested items indent by exactly one column:** the child's icon sits where the parent's label starts. A child without an icon starts its label on the child text line. Never indent by an arbitrary 12 or 20px.
+- **A logo or avatar wider than the icon column** starts on the box line and still puts its name on the text line. Size the gap after it, not the text line.
+- **Trailing badges and counts** sit on the trailing line or the trailing center line, the same one as the toolbar buttons above them.
 
-- **Icons sit on one column.** Left-align them on the box line, or center them on one vertical line. Pick one per sidebar. Different icon widths (a 14px dot beside a 20px glyph) must center on the column, never left-align, or the labels after them stagger.
-- **Labels start on one text line**, after the icon column plus the gap. Every row: nav items, the workspace switcher, favorites, teams.
-- **Section headers ("Workspace", "Favorites") start on the icon column's leading edge**, not on the label line. The header owns the group; starting it to the left of the labels says so.
-- **Nested items indent by exactly one column**: the child's icon sits where the parent's label starts. Children without an icon start their label on the child text line, not on the parent's. Never indent by an arbitrary 12 or 20px.
-- **A logo or avatar larger than the icon column** starts on the box line and still puts its name on the text line. Size the gap after it, not the text line.
-- **Trailing badges and counts** sit on the trailing line or on the trailing center line, the same one as the toolbar buttons above them.
+### Top bars and toolbars
 
-Why: Linear's redraw has one line through the icons, one through the labels, and one through every trailing item from the history clock to the compose button to the inbox count. That is the whole sidebar; nothing floats.
-
-### Top bars and toolbars: one center line
-
-- Every item in a bar centers on one horizontal line. Measure centers, not tops: a 24px button and a 16px icon in the same bar must share a center.
-- In a desktop app window, that line is the window controls' center (the traffic lights on macOS). The app's first bar aligns to them or is vertically centered with them.
-- The bar's first item starts on the container's text or box line, and its last item ends on the trailing line or centers on the trailing center line. A toolbar is a row of the panel below it, not its own grid.
+- Every item in a bar centers on one horizontal line. Measure centers, not tops: a 24px button and a 16px icon share a center.
+- In a desktop app window, the first bar's line is the window controls' center (the traffic lights on macOS), even when they sit above or below the bar's middle.
+- The bar's first item starts on the container's text or box line. Its last item ends on the trailing line or centers on the trailing center line. A toolbar is a row of the panel below it, not its own grid.
 - Trailing controls of different widths (a count badge, a 28px icon button, a 20px icon) center on one vertical line. Same-width controls align their trailing edge.
 
 ### Panels and the frame
 
 - Panels that share an edge share the line: the filters on a table toolbar end exactly under the trailing edge of the panel above.
 - The window frame (navbar, status bar) gets its own line from the window edge, shared by the first and last item of every frame bar.
-- Inside one product area, every panel uses the same text line. Different areas may differ (dense data panels at 8px, settings pages at 16px) when the policy says so.
+- Inside one product area, every panel uses the same text line. Areas may differ (dense data panels at 8px, settings pages at 16px) when the policy says so.
 
 ### Optical corrections
 
-- **Align the content, not the affordance.** When a select's label must end on a trailing line, put its chevron before the label. A chevron or caret on the line pushes the label off it.
-- **Invisible borders count.** A transparent 1px border offsets the label by 1px; take it back with a -1px margin on that side.
-- **Icon viewBox padding counts.** A 24px icon drawn in a 20px area sits 2px in from its box. Measure the glyph; correct with the icon's size or the column, not per row.
+- **Align the content, not the affordance.** When a select's label must end on a trailing line, put its chevron before the label.
+- **Invisible borders count.** A transparent 1px border offsets the label by 1px. Take it back with a -1px margin on that side.
+- **Icon viewBox padding counts.** A 24px icon drawn in a 20px area sits 2px in from its box. The probe measures the SVG box, so check the glyph by eye. Correct with the icon's size or the column, not per row.
 - **Tabs align their label, not their hit area.** Drop the tab list's padding and pull the strip in so the first label's ink sits on the text line.
-- **Round shapes look smaller.** A circle on a line overhangs it by about 1px compared with a square of the same size; a play triangle centers on its visual mass, about 1px toward the point.
+- **Round shapes look smaller.** A circle on a line overhangs it by about 1px compared with a square of the same size. A play triangle centers on its visual mass, about 1px toward the point.
 - **Text side bearing is 0 to 1px.** Never correct it per glyph.
 
 ### Shapes
 
-Buttons and fields in one container are either all rounded rectangles or all pills (fully round). Mix only for one special control, such as the single primary compose button, and say why in the policy.
-
-Why: two shape families in one bar read as two systems, and the eye compares their edges instead of reading their labels.
-
-## What never changes in this pass
-
-- Row heights, hit areas and control sizes that the policy approves. If closing a gap needs one of them, leave the gap, note its size, and ask.
-- Semantic elements and behavior. This is a padding pass.
-- Colors, type sizes and radii.
-
-## Common mistakes
-
-- **Fixing by eye.** Without guides, a 2px miss looks fine on one row and wrong on the page. Always draw first.
-- **Moving the majority to the outlier.** The line is where most rows already are, unless the policy says otherwise.
-- **Per-item nudges.** `ml-px` on one label is a fix that the next row added to that container will not inherit.
-- **Measuring boxes instead of ink.** A button's box at 8px with its label at 16px is correct, not a miss.
-- **Auditing empty states only** and reporting the page as aligned.
-- **Centering the top bar on the bar** when the window controls sit higher or lower than the bar's middle.
-
-## Checklist
-
-- [ ] Policy's recorded lines read first, used as the target
-- [ ] Guides drawn at 1440px and 390px, overlays opened, captures in `.agents/gridlines/`
-- [ ] Every container has a named text line, box line and trailing line
-- [ ] Every row is edge-positioned or centered, nothing in between
-- [ ] Sidebar: icon column, text line, headers on the icon edge, children indented one column
-- [ ] Bars: one center line, aligned to the window controls in desktop apps
-- [ ] Fixes made in container padding or shared inset variables, not on single items
-- [ ] Re-drawn: every item within 1px of its line
-- [ ] New lines recorded in the policy; report lists what was not covered
+Buttons and fields in one container are all rounded rectangles or all pills. One special control (the single primary compose button) may differ when the policy says why. Radii are outside this pass, so report a mix instead of changing it.
