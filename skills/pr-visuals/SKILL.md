@@ -12,7 +12,7 @@ Produce one framed image per visible change: the base on one side, the PR on the
 - Uploading images and editing a PR description are public, and most image hosts can't delete. Ask first, every time. Never post the images as a comment unless the user asks for that.
 - Playwright goes in a scratch folder, never the project.
 - Serve seeded or mocked data, never a live backend. Live data differs between the two runs for reasons that aren't the PR.
-- Keep `.agents/pr-visuals/` out of git with a `.gitignore` of `*` inside it. The images belong on the PR, not in the repo.
+- `.agents/pr-visuals/` stays out of git: the script writes a `.gitignore` of `*` into it. The images belong on the PR, not in the repo.
 
 ## 1. Set up once per project
 
