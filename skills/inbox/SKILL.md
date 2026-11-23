@@ -19,7 +19,7 @@ It runs two paged GitHub searches (your open PRs, and open PRs requesting your r
 
 - **needs you**: review requests; your PRs with changes requested or review threads where the reviewer spoke last; failing checks; conflicts; approved and green PRs to merge. Already ranked, oldest first.
 - **waiting** and **drafts**: one line per PR, or one line per repo with a search link when there are more than 10.
-- **each repo**: worktrees with uncommitted files, branches and detached HEADs with commits no live remote branch has, worktrees missing on disk, and stashes.
+- **each repo**: worktrees with uncommitted files, branches and detached HEADs with commits no live remote branch has, worktrees missing on disk, and stashes. A branch at the head of a merged PR is counted, not listed.
 
 Repos come from the arguments, then `repos` in `~/.agents/inbox.json` (see `references/inbox.example.json`), then the current repo. When a check always fails for reasons outside the PR (a preview deploy with its own quota, a coverage bot), list it in that file's `ignoreChecks`, or every PR looks red and the real failures drown. The project's own instructions may already name a check to ignore. `--no-gh` skips GitHub. `UNKNOWN` lines and exit 2 mean a fact couldn't be read: say so, don't call it clean.
 
