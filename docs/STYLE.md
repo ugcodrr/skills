@@ -15,7 +15,7 @@ This is what the skill repos people actually use have in common ([anthropics/ski
 ## Frontmatter
 
 - `name`: kebab-case and the same as the folder. Short and easy to say as a command (`settle`, not `thread-completion-checker`).
-- `description`: the only part an agent reads before it decides to load the skill. Say what it does in the first sentence. Then add "Use it for" and the phrases people actually type, including indirect ones ("can I close this"). Say when *not* to use it if there's a neighbor it could be confused with. Keep it under about 1,000 characters.
+- `description`: the only part an agent reads before it decides to load the skill. Say what it does in the first sentence. Then add "Use it for" and the phrases people actually type, including indirect ones ("can I close this"). Say when *not* to use it if there's a neighbor it could be confused with. Keep it under about 500 characters, since every installed skill's description loads in every session. 1,024 is the hard limit.
 
 ## Body
 
