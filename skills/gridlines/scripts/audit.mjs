@@ -69,4 +69,8 @@ for (const c of result) {
     console.log(`   MISS y${o.y} ${o.edge}: ${o.px}px vs ${o.line}px  ${o.item}`);
 }
 console.log(`\ncapture: ${join(outDir, `${slug}.png`)}`);
+if (result.length === 0) {
+  console.error("no container matched, so nothing was measured: set CONTAINERS to the page's own selectors");
+  process.exit(2);
+}
 process.exit(result.some((c) => c.outliers.length) ? 1 : 0);
