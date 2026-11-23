@@ -1,6 +1,6 @@
 ---
 name: pr-describe
-description: Write a PR description from the branch's diff, commits and linked issues, ready to paste as one block. The project's PR template or contributing guide wins. Otherwise it opens with what was wrong or missing and what changes for the user, keeps screenshots, merge order, conflicts and measured numbers visible, gives one Testing line, and tucks implementation notes into a collapsed Agent notes block. It never creates or edits the PR unless asked. Use it for "write the PR description", "PR body", "describe this PR", "draft the PR text", "update the description to match the diff", "the description is stale", or before opening a PR. Not for explaining a diff to someone who doesn't code (explain-diff) or for answering review comments (review-replies).
+description: Write a PR description from the branch's diff, commits and linked issues, ready to paste as one block. The project's PR template wins, and it never creates or edits the PR unless asked. Use it for "write the PR description", "PR body", "describe this PR", "update the description to match the diff", "the description is stale", or before opening a PR. Not for explaining a diff to someone who doesn't code (explain-diff) or answering review comments (review-replies).
 ---
 
 # PR describe
@@ -20,7 +20,7 @@ Keep a template's sections and checkboxes. Fill each one, and write "n/a" rather
 ## 2. Gather
 
 - **The PR, if there is one:** `gh pr view --json number,title,body,baseRefName,url,closingIssuesReferences`. Its base is the base. Without a PR, use the default branch (`gh repo view --json defaultBranchRef`).
-- **The commits and the diff:** `git log --format='%h %s%n%b' <base>..HEAD`, `git diff --stat <base>...HEAD`, then `git diff <base>...HEAD`. Read the files that carry the change, not just the stat.
+- **The commits and the diff:** `git log --format='%h %s%n%b' <base>..HEAD`, `git diff --stat <base>...HEAD`, then `git diff <base>...HEAD`. Read the files that carry the change, not just the stat. With no commits ahead of the base, say so and stop. Uncommitted changes (`git status --short`) aren't in that diff, so leave them out and say so.
 - **Linked issues:** `closingIssuesReferences`, `#123` or `Fixes #123` in the commits, and a number in the branch name (`fix/123-retry`). Read each one: `gh issue view <n> --json title,body`.
 - **Stacking:** if the base is another open PR's branch (`gh pr list --head <base>` finds it), the PR is stacked. Name the parent and say it merges first.
 - **Evidence:** test runs, screenshots, before and after numbers from this thread or the PR. Use only what exists. If nothing was run, the Testing line says what wasn't checked.
@@ -42,7 +42,7 @@ Describe only what the diff does. Don't list every file, don't claim a check tha
 
 ## 4. Hand it back
 
-Give the body as one fenced block, ready to paste. Use a four-backtick fence when the body has code blocks of its own. After it, one line: what you changed from the current body, if there was one.
+Give the body as one fenced block, ready to paste. Use a four-backtick fence when the body has code blocks of its own. After it, one or two lines at most: what you changed from the current body, if there was one, and anything the user still has to fill in or that you left out (a screenshot the template asks for, uncommitted changes).
 
 Don't run `gh pr create` or `gh pr edit` unless the user asks. When they do, write the body to a temp file and pass `--body-file`, so the shell doesn't mangle backticks.
 
