@@ -23,7 +23,8 @@
 // the dropped commits inside it. --apply
 // backs up each moved branch as refs/fold-backup/<stamp>/<branch> (not a branch, so no `git branch -D`),
 // moves it with `git update-ref`, or with `git reset --keep` where a worktree has it checked out, and
-// refuses when that worktree has uncommitted changes.
+// refuses when that worktree has uncommitted changes. It refuses to rewrite any commit a remote-tracking
+// ref already has, so fetch first.
 // Exits 0 after a clean dry run or apply, 1 when it can't fold, 2 on bad usage or a git failure.
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
@@ -278,6 +279,11 @@ if (leftBehind.length > 0) console.log(`\nNot moved, so still on the old commits
 const mismatched = branches.filter((branch) => branch.mismatch);
 if (mismatched.length > 0)
   fail(`the new tree isn't the old one plus its folds and minus its drops, so nothing was moved:\n${mismatched.map((branch) => `  ${branch.name}: ${branch.mismatch.split("\n").join(", ")}`).join("\n")}`);
+
+const unpublished = new Set(git("rev-list", ...branches.map((branch) => branch.old), `^${base}`, "--not", "--remotes").split("\n"));
+const published = commits.filter((commit) => mapped(commit.sha) !== commit.sha && !unpublished.has(commit.sha));
+if (published.length > 0)
+  fail(`these commits are on a remote, so folding them would rewrite published history. Nothing was moved:\n${published.map((commit) => `  ${describe(commit)}`).join("\n")}`);
 
 const moving = branches.filter((branch) => branch.new !== branch.old);
 if (!opts.apply) {
