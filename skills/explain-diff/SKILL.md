@@ -1,6 +1,6 @@
 ---
 name: explain-diff
-description: Explain a diff or PR in plain language for someone who doesn't code. Says what changes for users, then walks each meaningful change with one or two quoted diff lines and what they mean, names the risks in plain words, and says what wasn't touched. Short, no jargon, and any term it can't avoid is defined once. Use it for "explain this PR", "what does this change do", "walk me through the diff in plain English", "explain it like I don't code", "summarize this for my manager", "what's the risk of merging this", or before someone non-technical signs off on a change. Not for a code review (it doesn't hunt for bugs) or for writing the PR description (pr-describe).
+description: Explain a diff or PR in plain language for someone who doesn't code. It says what changes for users, walks each meaningful change with a quoted line or two, and names the risks and what wasn't touched. Use it for "explain this PR", "what does this change do", "explain it like I don't code", "summarize this for my manager", "what's the risk of merging this", or before someone non-technical signs off. Not for a code review (it doesn't hunt for bugs) or the PR description (pr-describe).
 ---
 
 # Explain diff
@@ -13,6 +13,8 @@ Tell someone who doesn't code what a change does for the people who use the prod
 - **A branch:** `git log <base>..HEAD` and `git diff <base>...HEAD`, where the base is the default branch unless the user names one.
 - **A commit or a range:** `git show <sha>`, or `git diff <a>..<b>`.
 - **Uncommitted work:** `git diff HEAD`, plus `git status --short` for new files.
+
+When the user names nothing, explain the current branch against the default branch, plus any uncommitted work. If the diff is empty, say so in one line and stop.
 
 Read the PR description and any linked issue for what the change is meant to do. Then describe what the diff actually does. If the two disagree, say so under Risks.
 
