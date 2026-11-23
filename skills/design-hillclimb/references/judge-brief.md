@@ -19,7 +19,7 @@ Each case has two captures, A and B, of the same frozen inputs. The order is shu
 - <metrics.json, if the run has per-case measurements: width, height, smallest label and headline at display size. Thresholds: labels < 6 px warn, < 5 severe; headlines < 12 warn, < 10 severe. Locators are not evidence.>
 
 Notes:
-- Some pairs may be identical. Say so for each one where you see no difference, and don't prefer a side.
+- <N> of the <total> pairs are byte-identical, <M> of them controls. Name each pair where you see no difference, and don't prefer a side.
 - <Layout facts the judge needs, e.g. "a row splits its width equally among its cells".>
 - Frozen recognition tasks: <per group, at display size>.
 - Role map: <headline vs label and detail; declared equal tracks>.

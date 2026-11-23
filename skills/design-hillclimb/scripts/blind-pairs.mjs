@@ -105,9 +105,11 @@ function writeBlindSet() {
   mkdirSync(options.out, { recursive: true });
   const key = { seed: options.seed, before: resolve(beforeDir), after: resolve(afterDir), cases: {} };
   const figures = [];
+  // Changed cases alternate sides, so a judge that always prefers one side can't pass every candidate
+  let changedSide = random() < 0.5;
   order.forEach((path, index) => {
     const id = `c${String(index + 1).padStart(2, "0")}`;
-    const beforeIsA = random() < 0.5;
+    const beforeIsA = changed.has(path) ? (changedSide = !changedSide) : random() < 0.5;
     const ext = extname(path);
     copyFileSync(join(beforeIsA ? beforeDir : afterDir, path), join(options.out, `${id}-A${ext}`));
     copyFileSync(join(beforeIsA ? afterDir : beforeDir, path), join(options.out, `${id}-B${ext}`));
