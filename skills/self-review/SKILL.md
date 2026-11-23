@@ -42,7 +42,7 @@ Run it. If it takes more than a minute, run it in the background and act on the 
 
 ## 3. Mechanical check
 
-Run `check-diff.mjs` again. Without `--head` it covers committed, uncommitted and untracked files. With `--head` it checks that commit range only. Each line is `LEVEL  file:line  message`, and the message says the fix. It exits 1 on any ERROR and 2 when it couldn't check (not a repo, unreadable settings).
+Use step 1's output if nothing changed since; otherwise run `check-diff.mjs` again. Without `--head` it covers committed, uncommitted and untracked files. With `--head` it checks that commit range only. Each line is `LEVEL  file:line  message`, and the message says the fix. It exits 1 on any ERROR and 2 when it couldn't check (not a repo, unreadable settings).
 
 - **ERROR** means a rule is broken. Fix it. If the user explicitly asked for that exact change, keep it and say so in the report.
 - **WARN** needs judgment. Fix it, or name it in the report with the reason you kept it.
