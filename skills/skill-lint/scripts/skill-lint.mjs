@@ -19,7 +19,7 @@ const { values: options, positionals } = parseArgs({
 });
 
 const MAX_DESCRIPTION = 1024;
-const SOFT_DESCRIPTION = 1000;
+const SOFT_DESCRIPTION = 500;
 const MAX_BODY_LINES = 150;
 
 const configPath = join(".agents", "skill-lint.json");
@@ -126,7 +126,7 @@ function lintSkill(dir) {
     if (description.length > MAX_DESCRIPTION)
       report("ERROR", file, 2, `description is ${description.length} characters, the limit is ${MAX_DESCRIPTION}`);
     else if (description.length > SOFT_DESCRIPTION)
-      report("WARN", file, 2, `description is ${description.length} characters, STYLE.md says under about ${SOFT_DESCRIPTION}`);
+      report("WARN", file, 2, `description is ${description.length} characters; it loads in every session, so aim for ${SOFT_DESCRIPTION} or less`);
     if (!/\buse (it|this|when|for)\b/i.test(description))
       report("WARN", file, 2, 'description has no "Use it when/for ..." trigger list');
     if (!/["“]/.test(description)) report("WARN", file, 2, "description quotes no trigger phrases");
