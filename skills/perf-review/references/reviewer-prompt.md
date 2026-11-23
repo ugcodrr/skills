@@ -1,6 +1,6 @@
 # Reviewer prompt
 
-Fill every `<...>` and send one per area, all at once: several Agent calls in one message in Claude Code, `delegate_task` in T3 Code, or another agent's equivalent. Give each reviewer absolute paths, since it starts with none of your context.
+Fill every `<...>` and send one per area. Give each reviewer absolute paths, since it starts with none of your context.
 
 ```
 Perf review of <repo>, area: <area name>. Read-only: don't edit files, start services, run builds or benchmarks, or call external services.
