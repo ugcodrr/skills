@@ -1,6 +1,6 @@
 # Run log template
 
-Copy this into `.agents/unattended/<run>/log.md` before the first change. Update it after every step. Someone who has only this file must be able to tell where the run is and what it does next.
+Copy this into `.agents/unattended/<run>/log.md`. Someone who has only this file must be able to tell where the run is and what it does next.
 
 ```markdown
 # <run name>
