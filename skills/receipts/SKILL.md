@@ -1,11 +1,11 @@
 ---
 name: receipts
-description: Check every "done", "fixed", "passing", "verified" and "no change" claim in the current thread against real evidence from after the last change. It reruns the cheap checks (one test file, a typecheck, a grep, git state) and marks each claim proven (with the command and result), stale, unproven or false, quoting where it was made. Reports only, and fixes nothing unless asked. Use it for /receipts, "show me the receipts", "prove it", "is that actually fixed", "did you really run the tests", "check your claims", "are you sure it passes", "verify before I merge", and before handing back work that says it's done. Not for what's left before closing (use settle) or for reviewing a diff against the project's rules (use self-review).
+description: Check every "done", "fixed", "passing", "verified" and "no change" claim in this thread against evidence from after the last change, and mark each proven, stale, unproven or false. It reports and fixes nothing. Use it for /receipts, "show me the receipts", "prove it", "is that actually fixed", "did you really run the tests", "check your claims", "verify before I merge", and before handing back work as done. Not for what's left before closing (use settle) or reviewing a diff (use self-review).
 ---
 
 # Receipts
 
-Answer one question: which claims in this thread still hold right now, and what proves it? A claim counts only if a check after the last relevant change shows it. Report; don't fix.
+Answer one question: which claims in this thread still hold right now, and what proves it? A claim counts only if a check after the last relevant change shows it. Report, and don't fix.
 
 ## 1. Collect the claims
 
@@ -18,7 +18,7 @@ A claim is any statement that something is true of the code or the world:
 - **State**: committed, pushed, merged, up to date, CI passes.
 - **Numbers**: a timing, a count, a size, a percentage.
 
-Quote each one in a few words and say where it was made: which reply ("the reply after the lint fix"), which report, which file.
+Quote each one in a few words and say where it was made: which reply ("the reply after the lint fix"), which report, which file. If the thread makes no claims, say so in one line and stop.
 
 ## 2. Find what each claim depends on, and when that last changed
 
@@ -46,9 +46,9 @@ Cheap means under about a minute and no side effects: one test file or a filtere
 - **Unproven**: nothing has ever shown it, or showing it needs a check you can't run here (a device, a manual look, production).
 - **False**: a check shows the opposite.
 
-## Report
+## 5. Report
 
-The first line is the tally. Then False, Stale, Unproven and Proven, worst first, skipping empty ones. One line each: the quote, where it was made, then the evidence.
+The first line is the tally. Then False, Stale, Unproven and Proven, worst first, skipping empty ones. One line each: the quote, where it was made, then the evidence. Add nothing else: no summary and no advice.
 
 ```
 Receipts: 6 claims, 3 proven, 1 stale, 1 unproven, 1 false.
@@ -71,4 +71,4 @@ Proven
 After the report:
 
 - Name any artifact that repeats a false or stale claim (a PR body, a commit message, a report), so the user knows what to correct.
-- If the user asks you to fix things, fix the false ones first, then run receipts again so the tally is current.
+- Fix nothing unless the user asks. When they do, fix the false ones first, then run receipts once more so the tally is current.
