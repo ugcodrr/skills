@@ -9,8 +9,8 @@
 //   node context-audit.mjs [--since 24h | 7d | 2026-01-31T09:00Z] [--project <path substring>] [--sessions 25]
 //
 // Reads ~/.claude/projects/**/*.jsonl (with Agent subagents) and ~/.codex/sessions/**/rollout-*.jsonl.
-// --project keeps sessions whose working directory contains the substring. Exits 0, or 2 on bad arguments
-// or when neither log folder exists.
+// --project keeps sessions whose working directory contains the substring. Exits 0, or 2 on bad arguments,
+// when neither log folder exists, or when no session matched.
 import { createReadStream, existsSync, readdirSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { homedir } from "node:os";
@@ -268,6 +268,7 @@ const imageTotal = sessions.reduce((sum, session) => sum + session.images, 0);
 const ranked = sessions.filter((session) => session.total).sort((a, b) => b.total - a.total);
 
 const scope = project ? ` in ${project}` : "";
+if (sessions.length === 0) fail(`no sessions${scope} changed since ${new Date(since).toISOString()} (widen --since, or check --project)`);
 console.log(`${sessions.length} sessions${scope} changed since ${new Date(since).toISOString()}: ${kb(grand)} of tool-result text and ${imageTotal} images\n`);
 
 const allTools = new Map();

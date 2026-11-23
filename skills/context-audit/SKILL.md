@@ -15,7 +15,7 @@ node <this skill's folder>/scripts/context-audit.mjs --since 7d [--project <path
 
 - `--since` takes `24h` (the default), `7d` or a time like `2026-01-31T09:00Z`. Use the window the user named; otherwise 7d.
 - `--project` keeps sessions whose working directory contains the substring. Use the repo's folder name when the user asks about "this project".
-- It reads `~/.claude/projects/` (with Agent subagents, shown as `<session>/<agent>`) and `~/.codex/sessions/`, read-only, in a second or two. It exits 2 on bad arguments or when neither folder exists.
+- It reads `~/.claude/projects/` (with Agent subagents, shown as `<session>/<agent>`) and `~/.codex/sessions/`, read-only, in a second or two. It exits 2 on bad arguments, when neither folder exists, or when no session matched.
 
 Never open the log files yourself, and don't quote anything from them. They hold whole conversations, tool output and sometimes keys. The script prints only what's safe to quote; if a number needs explaining, look at the tool or script that produced it, not the log.
 
