@@ -96,7 +96,7 @@ node <this skill's folder>/scripts/fold-stack.mjs --base <ref> <top branch> [--a
 
 For an unpushed stack whose branches are joined by merges (each child `git merge`s its parent), which `git rebase --autosquash` can't fold. A linear stack can use `git rebase -i --autosquash --update-refs` instead.
 
-1. Check that no branch in the stack is pushed: `git ls-remote --heads <remote> <branch>...` prints nothing. The script doesn't check. A pushed branch is never folded, so use section 2 for it.
+1. `git fetch` first. The script refuses to rewrite any commit a remote-tracking ref has, since a pushed branch is never folded. Use section 2 for it.
 2. Read `references/fold-stack.md` before the first run in a thread, and whenever the script stops. It covers rewording, `--map` lines, drops, and what each stop means.
 3. Run it without `--apply`. Each `fixup! <subject>` folds into the one commit in `<base>..` with that subject. Check the table it prints for each branch.
 4. Run it with `--apply`. It backs up each branch under `refs/fold-backup/<stamp>/` and moves them all in one transaction. It never pushes.
