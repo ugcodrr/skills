@@ -7,11 +7,13 @@
 //
 // Without PR numbers it checks every open PR by --author (default "author" in .agents/review-replies.json,
 // else @me). For each PR with something waiting it writes .agents/review-replies/<n>.threads.md,
-// regenerated every run, and it removes the file of a checked PR with nothing waiting: unresolved review threads whose last word isn't the PR author's, and reviews and
+// regenerated every run: unresolved review threads whose last word isn't the PR author's, and reviews and
 // top-level comments from others since the author last wrote, each with the diff hunk and the PR's commits
 // since. Bots are skipped unless their login is in "reviewBots" in .agents/review-replies.json.
+// It removes the file of a checked PR with nothing waiting, and on a run without PR numbers, the file of
+// any PR that's no longer open.
 // Exits 0 when nothing is waiting, 1 when something is, 2 when gh or git failed.
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { parseArgs } from "node:util";
 import { spawnSync } from "node:child_process";
@@ -71,6 +73,11 @@ const numbers =
 
 mkdirSync(dir, { recursive: true });
 writeFileSync(join(dir, ".gitignore"), "*\n");
+if (positionals.length === 0)
+  for (const name of readdirSync(dir)) {
+    const match = name.match(/^(\d+)\.threads\.md$/);
+    if (match && !numbers.includes(Number(match[1]))) rmSync(join(dir, name));
+  }
 const isBot = (author) => !author || ((author.__typename === "Bot" || author.login.endsWith("[bot]")) && !reviewBots.has(login(author.login)));
 const list = (log) => {
   const commits = log ? log.split("\n") : [];
