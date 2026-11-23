@@ -110,6 +110,11 @@ const branch = repo && tryGit(repo, "symbolic-ref", "--quiet", "--short", "HEAD"
 const folderName = pr ? String(pr.number) : (branch ?? "detached").replaceAll("/", "-");
 if (!opts.out && !repo) stop("run it from a git checkout, or pass --out");
 const out = resolve(opts.out ?? join(repo, ".agents", "pr-visuals", folderName));
+if (!opts.out) {
+  const ignore = join(repo, ".agents", "pr-visuals", ".gitignore");
+  mkdirSync(dirname(ignore), { recursive: true });
+  if (!existsSync(ignore)) writeFileSync(ignore, "*\n");
+}
 const shotsPath = join(out, "shots.json");
 if (!existsSync(shotsPath)) stop(`no ${shotsPath}; write one (see references/shots.json in this skill)`);
 const shotFile = JSON.parse(readFileSync(shotsPath, "utf8"));
