@@ -2,7 +2,8 @@
 // The GitHub and git facts behind an inbox: your open PRs (review state, threads awaiting your reply,
 // failing checks, conflicts), open PRs that request your review, and, in each repo you name, worktrees
 // with uncommitted work, branches with commits no live remote branch has, and stashes.
-// Read-only with no fetch: two paged GitHub searches and one ls-remote per remote.
+// Read-only with no fetch: two paged GitHub searches, one ls-remote per remote, and one GitHub lookup
+// per repo for branches that look unpushed, so a merged PR's deleted branch isn't reported as unpushed.
 // Exits 0 when nothing needs you, 1 when something does, 2 when a fact couldn't be read.
 //
 //   node inbox-facts.mjs [repo…] [--no-gh]
@@ -49,12 +50,13 @@ function unknown(message) {
   console.log(`  UNKNOWN: ${message}`);
 }
 
-function run(command, args, input) {
+function run(command, args, input, cwd) {
   try {
     return execFileSync(command, args, {
       encoding: "utf8",
       env,
       input,
+      cwd,
       timeout: 60_000,
       maxBuffer: 64 * 1024 * 1024,
       stdio: ["pipe", "pipe", "ignore"],
@@ -259,25 +261,54 @@ function local(path) {
     if (head) refs.push(`(detached in ${tilde(tree.path)}) ${head}`);
   }
   let saved = 0;
+  let landed = 0;
   if (remotes.length === 0) console.log("  no remotes: every commit exists only here");
   else {
     const exclude = [...known].map((tip) => `^${tip}`).join("\n");
+    const unpushed = [];
     for (const ref of refs) {
       const split = ref.lastIndexOf(" ");
       const [name, sha] = [ref.slice(0, split), ref.slice(split + 1)];
       const count = run("git", ["-C", path, "rev-list", "--count", "--stdin"], `${sha}\n${exclude}\n`);
       if (count === undefined) unknown(`${name}: git rev-list failed`);
       else if (count === "0") saved++;
-      else {
-        needsYou++;
-        const where = name.startsWith("(") || checkedOut.has(name) ? "" : ", not checked out";
-        console.log(`  branch ${name} at ${short(sha)}: ${count} ${count === "1" ? "commit" : "commits"} on no live remote branch${where}`);
+      else unpushed.push({ name, sha, count });
+    }
+    const merged = mergedHeads(path, unpushed.map((ref) => ref.name).filter((name) => !name.startsWith("(")));
+    for (const { name, sha, count } of unpushed) {
+      if (merged.get(name)?.includes(sha)) {
+        landed++;
+        continue;
       }
+      needsYou++;
+      const where = name.startsWith("(") || checkedOut.has(name) ? "" : ", not checked out";
+      console.log(`  branch ${name} at ${short(sha)}: ${count} ${count === "1" ? "commit" : "commits"} on no live remote branch${where}`);
     }
   }
   if (unfetched > 0) console.log(`  (${unfetched} live remote heads aren't fetched and might hold some of these commits)`);
 
   for (const stash of lines(git("stash", "list", "--format=%gd %cr: %gs"))) console.log(`  ${stash}`);
   const pushed = remotes.length ? `, ${saved} ${saved === 1 ? "branch" : "branches"} with every commit on a remote` : "";
-  console.log(`  ${clean} clean ${clean === 1 ? "worktree" : "worktrees"}${pushed}`);
+  const merged = landed ? `, ${landed} at the head of a merged PR whose remote branch is gone` : "";
+  console.log(`  ${clean} clean ${clean === 1 ? "worktree" : "worktrees"}${pushed}${merged}`);
+}
+
+// A squash merge that deletes its branch leaves the local one on no live head. Only a merged PR whose
+// head is the local tip counts, so a lookup that fails reports the branch as unpushed.
+function mergedHeads(path, names) {
+  const heads = new Map();
+  if (options["no-gh"]) return heads;
+  for (let start = 0; start < names.length; start += 50) {
+    const batch = names.slice(start, start + 50);
+    const fields = batch.map((name, index) => `b${index}: pullRequests(headRefName: ${JSON.stringify(name)}, states: MERGED, last: 5) { nodes { headRefOid } }`);
+    const query = `query($owner: String!, $name: String!) { repository(owner: $owner, name: $name) { ${fields.join(" ")} } }`;
+    const json = run("gh", ["api", "graphql", "-F", "owner={owner}", "-F", "name={repo}", "-f", `query=${query}`], undefined, path);
+    try {
+      const repository = JSON.parse(json).data.repository;
+      batch.forEach((name, index) => heads.set(name, repository[`b${index}`].nodes.map((pr) => pr.headRefOid)));
+    } catch {
+      continue;
+    }
+  }
+  return heads;
 }
