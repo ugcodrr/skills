@@ -31,7 +31,7 @@ From the branch's checkout:
 node <this skill's folder>/scripts/diff-proof.mjs [--base <ref|dir>] [--head <ref|dir>] [--probes a,b] [--no-build] [--out <dir>]
 ```
 
-- The head defaults to this checkout, uncommitted changes included (the report says so). `git add` any new file first: the script doesn't count untracked files as a change.
+- The head defaults to this checkout, uncommitted and untracked changes included (the report says so). Don't stage, commit or stash anything in it.
 - The base defaults to the head's merge-base with the default branch (`origin/HEAD`, else `main` or `master`), after a quiet fetch. For a stacked branch, pass its parent as `--base origin/<parent branch>`, or the parent's changes count too.
 - A ref gets a detached worktree under `~/.cache/diff-proof/<repo>-<id>/` (or `$XDG_CACHE_HOME`), reused across runs. The first run creates it and runs `setup`, which takes as long as a fresh clone's install, so run it in the background. Later runs only build.
 - Outputs and `report.md` go to `<tmp>/diff-proof/<repo>/<head>-vs-<base>/`, one folder per probe with each side's stdout, stderr and files.
@@ -58,7 +58,7 @@ node <this skill's folder>/scripts/diff-proof.mjs [--base <ref|dir>] [--head <re
 ```
 
 - Say "identical" only when the probe says so. "585 pixels off by at most 4/255" is a difference: report it as one and let the user decide whether it matters.
-- For each difference, say whether the PR means it. When it doesn't, the probe's folder shows where. Fix the code, rebuild only the head, and rerun with `--no-build`.
+- For each difference, say whether the PR or the user says it's meant. If nothing says, mark it unknown and ask: don't guess. The probe's folder shows where it differs. Change the code only when the user asks, then rebuild only the head and rerun with `--no-build`.
 - Timing: quote only numbers from the report, and name the machine they ran on ("on a laptop, not production"). A change marked "within noise" isn't a win. Rerun with more `runs` or leave it out.
 
-Report to the user in this order, and keep it short: one line per probe with its result, which probe covers the change, each difference marked intended or not, then what you couldn't freeze or cover (thread scheduling, map iteration order, a live dependency). In a PR description, quote the summary lines, not the whole report.
+Report to the user in this order, and keep it short: one line per probe with its result, which probe covers the change, each difference marked intended, unintended or unknown, then what you couldn't freeze or cover (thread scheduling, map iteration order, a live dependency). In a PR description, quote the summary lines, not the whole report.

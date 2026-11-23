@@ -55,7 +55,8 @@ const tryGit = (dir, ...args) => {
 const git = (dir, ...args) => tryGit(dir, ...args) ?? stop(`git ${args.join(" ")} failed in ${dir}`);
 const isDir = (path) => existsSync(path) && statSync(path).isDirectory();
 const short = (commit) => (commit ? commit.slice(0, 9) : "dir");
-const dirty = (dir) => Boolean(tryGit(dir, "status", "--porcelain", "--untracked-files=no"));
+// New files count as head changes, but a cached worktree stops only on tracked edits: builds leave untracked output
+const dirty = (dir, untracked = false) => Boolean(tryGit(dir, "status", "--porcelain", `--untracked-files=${untracked ? "normal" : "no"}`));
 
 const repo = tryGit(process.cwd(), "rev-parse", "--show-toplevel");
 const configPath = join(repo ?? process.cwd(), ".agents", "diff-proof.json");
@@ -92,7 +93,7 @@ else {
   baseLabel = `merge-base with ${main}`;
 }
 
-const headDirty = headDirGiven ? dirty(headDirGiven) : false;
+const headDirty = headDirGiven ? dirty(headDirGiven, true) : false;
 if (!baseIsDir && baseCommit === headCommit && !headDirty) stop(`base and head are the same commit (${short(headCommit)}) with no uncommitted changes`);
 
 const commonDir = repo && git(repo, "rev-parse", "--path-format=absolute", "--git-common-dir");
