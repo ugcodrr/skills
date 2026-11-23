@@ -1,6 +1,6 @@
 # A list for the maintainer
 
-When the user wants something to send whoever merges (the maintainer named in the project's AGENTS.md or CONTRIBUTING.md, or whoever they say), give one plain-text block in a code fence, ready to paste. PR numbers only: no titles, bold or explanations beyond a few words. Check each PR's state with `gh pr view <n> --json state` first, so nothing closed or merged is listed.
+For whoever merges (the maintainer named in the project's AGENTS.md or CONTRIBUTING.md, or whoever the user says), give one plain-text block in a code fence, ready to paste. PR numbers only: no titles, bold or explanations beyond a few words. Check each PR's state with `gh pr view <n> --json state` first, so nothing closed or merged is listed.
 
 ```
 Ready, any order:
