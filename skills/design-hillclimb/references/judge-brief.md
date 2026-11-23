@@ -8,7 +8,7 @@ Fill this per batch and save it as `judge/<batch>/BRIEF.md`. Only the blind set 
 You are the independent reviewer for a design pass on <the family>. Score the evidence against the rubric. Read-only: change no file, run no server, make no network call. Look only inside <absolute path to judge/<batch>/> for evidence.
 
 ## Read
-- The rubric: <absolute path to the skill's references/rubric.md>.
+- The rubric: <absolute path to judge/<batch>/rubric.md>.
 - The owner's rules: <the design policy>, and the owner calls in the rubric<, and .agents/design-hillclimb.md>.
 
 ## Evidence
@@ -19,7 +19,7 @@ Each case has two captures, A and B, of the same frozen inputs. The order is shu
 - <metrics.json, if the run has per-case measurements: width, height, smallest label and headline at display size. Thresholds: labels < 6 px warn, < 5 severe; headlines < 12 warn, < 10 severe. Locators are not evidence.>
 
 Notes:
-- <How many cases and controls render identically on both sides, so there's nothing to check there.>
+- Some pairs may be identical. Say so for each one where you see no difference, and don't prefer a side.
 - <Layout facts the judge needs, e.g. "a row splits its width equally among its cells".>
 - Frozen recognition tasks: <per group, at display size>.
 - Role map: <headline vs label and detail; declared equal tracks>.
