@@ -7,11 +7,11 @@
 //
 // Without PR numbers it checks every open PR by --author (default "author" in .agents/review-replies.json,
 // else @me). For each PR with something waiting it writes .agents/review-replies/<n>.threads.md,
-// regenerated every run: unresolved review threads whose last word isn't the PR author's, and reviews and
+// regenerated every run, and it removes the file of a checked PR with nothing waiting: unresolved review threads whose last word isn't the PR author's, and reviews and
 // top-level comments from others since the author last wrote, each with the diff hunk and the PR's commits
 // since. Bots are skipped unless their login is in "reviewBots" in .agents/review-replies.json.
 // Exits 0 when nothing is waiting, 1 when something is, 2 when gh or git failed.
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { parseArgs } from "node:util";
 import { spawnSync } from "node:child_process";
@@ -107,7 +107,11 @@ for (const number of numbers) {
   );
   const comments = pr.comments.nodes.filter((c) => c.author?.login !== me && !isBot(c.author) && c.createdAt > mine);
 
-  if (threads.length + reviews.length + comments.length === 0) continue;
+  const file = join(dir, `${number}.threads.md`);
+  if (threads.length + reviews.length + comments.length === 0) {
+    rmSync(file, { force: true });
+    continue;
+  }
   waiting++;
 
   sh("git", ["-C", root, "fetch", "-q", remote, `+refs/pull/${number}/head:refs/pr/${number}`]);
@@ -154,7 +158,6 @@ for (const number of numbers) {
     lines.push(`## Comment by ${comment.author.login}, ${day(comment.createdAt)}`, "", comment.url, "", quote(comment.body), "", `Commits since:${list(since(comment.createdAt))}`, "");
   }
 
-  const file = join(dir, `${number}.threads.md`);
   writeFileSync(file, lines.join("\n"));
   console.log(`#${number} ${pr.title}: ${threads.length} thread(s), ${reviews.length} review(s), ${comments.length} comment(s) → ${relative(process.cwd(), file)}`);
 }
