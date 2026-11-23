@@ -3,7 +3,8 @@
  * The git and PR facts a thread checks before it settles: uncommitted work in this worktree, every
  * stash, and for each branch (plus the current one, or a detached HEAD) where it stands against the
  * remote's live heads, where it's checked out and its PRs. Read-only with no fetch: one ls-remote
- * per remote and one gh call per branch. Exits 0, or 2 when a fact couldn't be read (an UNKNOWN line).
+ * per remote, one gh call per branch and one per open PR for its unresolved review threads. Exits 0,
+ * or 2 when a fact couldn't be read (an UNKNOWN line).
  *
  *   node <this skill's folder>/scripts/settle-facts.mjs [branch…] [--remote <name>] [--no-gh]
  *
@@ -188,10 +189,26 @@ function pullRequests(branch, local) {
     const fork = pr.isCrossRepository ? ` from ${pr.headRepositoryOwner?.login ?? "a fork"}` : "";
     const conflicts = pr.state === "OPEN" && pr.mergeable === "CONFLICTING" ? ", conflicts" : "";
     const head = !pr.headRefOid ? "unknown" : local && pr.headRefOid === local ? "same as local" : `at ${short(pr.headRefOid)}`;
-    console.log(`  PR #${pr.number} "${pr.title}"${fork}: ${state}${review}${conflicts}, base ${pr.baseRefName}, head ${head}, checks ${checks(pr.statusCheckRollup ?? [])}  ${pr.url}`);
+    const unresolved = pr.state === "OPEN" ? unresolvedThreads(pr.url) : 0;
+    const threads = unresolved > 0 ? `, ${unresolved} unresolved ${unresolved === 1 ? "thread" : "threads"}` : "";
+    console.log(`  PR #${pr.number} "${pr.title}"${fork}: ${state}${review}${conflicts}${threads}, base ${pr.baseRefName}, head ${head}, checks ${checks(pr.statusCheckRollup ?? [])}  ${pr.url}`);
+    if (unresolved === undefined) unknown(`couldn't read the review threads on #${pr.number}`);
   }
 
   if (prs.length === limit) console.log(`  (the first ${limit} PRs only)`);
+}
+
+function unresolvedThreads(url) {
+  const { host, pathname } = new URL(url);
+  const [, owner, name, , number] = pathname.split("/");
+  const query = "query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){reviewThreads(first:100){nodes{isResolved}}}}}";
+  const json = run("gh", ["api", "graphql", "--hostname", host, "-f", `query=${query}`, "-f", `owner=${owner}`, "-f", `name=${name}`, "-F", `number=${number}`]);
+
+  try {
+    return JSON.parse(json).data.repository.pullRequest.reviewThreads.nodes.filter((thread) => !thread.isResolved).length;
+  } catch {
+    return undefined;
+  }
 }
 
 function checks(rollup) {
