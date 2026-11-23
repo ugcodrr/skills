@@ -7,10 +7,11 @@
 //   node blind-pairs.mjs <before-dir> <after-dir>
 //   node blind-pairs.mjs <before-dir> <after-dir> --out <judge-dir> --key <key.json> [--seed <n>] [--width <px>]
 //
-// --out copies each changed case into a new <judge-dir> as c01-A.png and c01-B.png, with case order and
-// sides shuffled, plus index.html showing A beside B at most --width px wide (default 400; click for full
-// size). --key gets the mapping back to paths and sides, and must sit outside <judge-dir>. The same seed
-// gives the same shuffle.
+// --out copies every case found on both sides, unchanged ones included so a judge's side bias shows, into a
+// new <judge-dir> as c01-A.png and c01-B.png, with case order and sides shuffled, plus index.html showing
+// A beside B at most --width px wide (default 400; click for full size). --key gets the mapping back to
+// paths, sides and whether the case changed, and must sit outside <judge-dir>. The same seed gives the
+// same shuffle.
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
@@ -41,7 +42,8 @@ if (options.out && existsSync(options.out) && readdirSync(options.out).length) f
 const before = listFiles(beforeDir);
 const after = listFiles(afterDir);
 const cases = [...new Set([...before, ...after])].sort();
-const changed = [];
+const matched = [];
+const changed = new Set();
 const counts = { same: 0, changed: 0, "only-before": 0, "only-after": 0 };
 
 for (const path of cases) {
@@ -54,7 +56,8 @@ for (const path of cases) {
   counts[state]++;
   const sizes = state === "changed" ? `  ${pngSize(a)} -> ${pngSize(b)}` : "";
   console.log(`${state.padEnd(11)}  ${path}${sizes}`);
-  if (state === "changed") changed.push(path);
+  if (state === "changed") changed.add(path);
+  if (state === "changed" || state === "same") matched.push(path);
 }
 console.log(`\n${cases.length} case(s): ${counts.changed} changed, ${counts.same} same, ${counts["only-before"] + counts["only-after"]} missing on one side`);
 
@@ -93,7 +96,7 @@ function writeBlindSet() {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  const order = [...changed];
+  const order = [...matched];
   for (let i = order.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
     [order[i], order[j]] = [order[j], order[i]];
@@ -108,7 +111,7 @@ function writeBlindSet() {
     const ext = extname(path);
     copyFileSync(join(beforeIsA ? beforeDir : afterDir, path), join(options.out, `${id}-A${ext}`));
     copyFileSync(join(beforeIsA ? afterDir : beforeDir, path), join(options.out, `${id}-B${ext}`));
-    key.cases[id] = { path, A: beforeIsA ? "before" : "after", B: beforeIsA ? "after" : "before" };
+    key.cases[id] = { path, changed: changed.has(path), A: beforeIsA ? "before" : "after", B: beforeIsA ? "after" : "before" };
     const side = (s) => `<figure><a href="${id}-${s}${ext}"><img src="${id}-${s}${ext}"></a><figcaption>${id} ${s}</figcaption></figure>`;
     figures.push(`<section><h2>${id}</h2>${side("A")}${side("B")}</section>`);
   });
