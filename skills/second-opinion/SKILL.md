@@ -1,6 +1,6 @@
 ---
 name: second-opinion
-description: Get a second opinion that isn't anchored on yours. Hand a plan, diff, finding list or report to a fresh agent or another model with the material and the question but not your conclusion, then reconcile the two answers item by item and check every disagreement against the code before acting. Use it for "get a second opinion", "sanity check this", "fresh eyes", "have another agent look", "ask Codex", "double-check with another model", "am I missing something", "is this plan sound", and before acting on a risky plan or pushing a diff you aren't sure of. Not for splitting work across parallel agents (use split-threads) or a full pre-push review of your branch (use self-review).
+description: Get a second opinion that isn't anchored on yours. Hand a plan, diff, finding list or report to a fresh agent or another model without your conclusion, then check every disagreement against the code before acting. Use it for "get a second opinion", "sanity check this", "fresh eyes", "ask Codex", "am I missing something", "is this plan sound", and before acting on a risky plan or diff. Not for splitting work across agents (use split-threads) or a full review of your branch (use self-review).
 ---
 
 # Second opinion
@@ -16,7 +16,7 @@ Write the question in one sentence before you gather anything. Ask for defects, 
 - "Is each of these five findings real?"
 - "Is every caller of `parseConfig` updated, as this report claims?"
 
-One question per opinion. "Is it correct and is it fast?" is two opinions, and they can run side by side.
+One question per opinion. "Is it correct and is it fast?" is two opinions, and they can run side by side. A brief with three questions gets three shallow answers.
 
 ## 2. Gather the material, not your summary
 
@@ -24,7 +24,7 @@ Give it:
 
 - **The code itself:** paths to read, the diff command (`git diff <base>...HEAD`), the branch. A summary of the code carries your reading of it.
 - **The task as stated:** the user's words, the issue or the spec, quoted.
-- **Facts already established,** each with its source: "`getUser` returns null for a deleted user (`api/users.ts:42`)", "the flaky test also fails on main (run on `a1b2c3d`)". This is the only way to say what's been ruled out.
+- **Facts already established,** each with its source: "`getUser` returns null for a deleted user (`api/users.ts:42`)", "the flaky test also fails on main (run on `a1b2c3d`)". This is the only way to say what's been ruled out, never "I already checked X and it's fine".
 - **Claims to check,** when the material is a finding list or a report: each one as `file:line: claim`, without your severity, reasoning or confidence.
 
 Leave out your conclusion, your findings (unless they're the claims to check), your hypothesis about the cause, which option you favor, how sure you are, and commit messages or PR text that argue for the change.
@@ -37,7 +37,7 @@ Prefer another model, since it has different blind spots. A fresh agent of the s
 - **Claude Code:** the Agent tool with a fresh general-purpose agent, never a fork: a fork inherits your context, conclusion included. If the Codex CLI is installed, `codex exec --sandbox read-only --output-last-message <tmp>/answer.md - < <tmp>/brief.md` from the repo root is another model.
 - **Otherwise:** give the user the brief to paste into another model, and wait for the answer.
 
-The reviewer only reads. Run it in the background when you have other work, and wait for its result instead of polling.
+The reviewer only reads. Run it in the background when you have other work, and wait for its result instead of polling. If it fails or returns nothing you can use, say so in the report, and don't call your own answer checked.
 
 ## 4. Write the brief
 
@@ -65,7 +65,9 @@ Lay the two answers side by side. Every item gets one label:
 - **New:** only the second opinion has it. Verify it against the source exactly like a disagreement. A mistake comes back in the same confident tone as a finding.
 - **Only mine:** only you had it. Recheck it too. Don't drop it because the reviewer missed it, and don't keep it because you found it first.
 
-An item the code can't settle goes to the user with both positions and the evidence for each. It doesn't become a fix.
+An item the code can't settle goes to the user with both positions and the evidence for each. It doesn't become a fix. Decisions that were the user's stay the user's.
+
+Don't rerun it until it agrees. Rewording the brief until the answer matches yours is anchoring by another route. Ask again only when the material changed (a new diff), and say that you did.
 
 ## 6. Report
 
@@ -83,12 +85,3 @@ Question: what correctness bugs does this diff have?
 
 Fixing 1 and 2 now. Nothing left for you.
 ```
-
-## Rules
-
-- **Give it the code, not your summary.** Paths and diffs, never your paraphrase.
-- **One question per opinion.** A brief with three questions gets three shallow answers.
-- **Say what's ruled out only as facts,** each with its source, never as "I already checked X and it's fine".
-- **Verify every disagreement and every new item against the source before acting.** Confidence is not evidence, on either side.
-- **Don't re-run it until it agrees.** Rewording the brief until the answer matches yours is anchoring by another route. Ask again only when the material changed (a new diff), and say that you did.
-- **Its answer is input, not a verdict.** Decisions that were the user's stay the user's.
