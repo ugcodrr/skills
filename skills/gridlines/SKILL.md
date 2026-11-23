@@ -30,7 +30,7 @@ Draw the guide lines first, then move the items. When you're done, every contain
    - `MISS y<row> <edge>: <measured>px vs <line>px <item>` is a row off its line. The edge is `leading`, `label`, `icon-column`, `trailing` or `vertical-center`. For `vertical-center`, the first number is how far apart the row's item centers are.
    - The probe measures ink: a text run's bounds, an icon's SVG box, and the box itself for a control with a fill, full border or shadow.
    - Confirm every miss on the capture before acting on it. The probe groups items into rows by center and can put one in the wrong row.
-   - A container with no `##` block wasn't measured. The probe looks only inside `aside`, `nav`, `header`, `section`, `article`, dialogs, menus, listboxes and cards, so set `CONTAINERS='<css selectors>'` for anything else. No blocks at all is not a pass, even though the exit code is 0.
+   - A container with no `##` block wasn't measured. The probe looks only inside `aside`, `nav`, `header`, `section`, `article`, dialogs, menus, listboxes and cards, so set `CONTAINERS='<css selectors>'` for anything else. With no block at all it exits 2.
 5. **Decide each container's lines.** Take the first that applies:
    1. The line the policy names.
    2. The neighbor's line, when the container shares an edge with it (stacked panels, a toolbar over a table).
