@@ -1,11 +1,11 @@
 ---
 name: retro
-description: Turn what the user had to correct during a thread into proposed instruction lines, so the next agent doesn't need the same correction. It finds corrections, repeated mistakes, wrong assumptions and things the user said twice, drops what the instructions already say and one-offs, and proposes one line each with why and its home (the project's AGENTS.md or CLAUDE.md, the user's global instructions, a skill, or the agent's memory). It asks which to keep in one batched question, then writes only the approved lines. Use it for /retro, "what should go in AGENTS.md", "remember this for next time", "don't make me say this again", "learn from this thread", "update your instructions", "what did I have to correct". Not for logging tool friction and slow steps (use hiccups) or turning a procedure into a new skill (use skill-from-thread).
+description: Turn what the user had to correct in a thread into proposed instruction lines, so the next agent doesn't need the same correction. It asks once which to keep and writes only the approved lines. Use it for /retro, "what should go in AGENTS.md", "remember this for next time", "don't make me say this again", "learn from this thread", "update your instructions", "what did I have to correct". Not for logging tool friction (use hiccups) or turning a procedure into a skill (use skill-from-thread).
 ---
 
 # Retro
 
-Produce the few instruction lines that would have made this thread's corrections unnecessary. Propose, ask once, and write only what the user approves.
+Produce the few instruction lines that would have made this thread's corrections unnecessary. Propose, ask once, and write only what the user approves. Never commit them.
 
 ## 1. Find the corrections
 
@@ -22,7 +22,7 @@ Read the thread start to end. Quote each candidate in a few words:
 
 Drop a candidate when:
 
-- **The instructions already say it.** Read the project's AGENTS.md or CLAUDE.md (and nested ones in folders the thread touched), the user's global instructions (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`), the skill that was running, and the host's memory. Grep for the key words. If the rule exists and you broke it, a second copy won't help. Propose a sharper rewording of that line only if it's genuinely ambiguous, and quote it.
+- **The instructions already say it.** Read the project's AGENTS.md or CLAUDE.md (and nested ones in folders the thread touched), the user's global instructions (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`), the skill that was running, and the host's memory. Grep for the key words. If the rule is there and you broke it, don't add a second copy. Propose a sharper rewording of that line only if it's ambiguous, and quote it.
 - **It's a one-off.** "Use blue here" is about this task. A line earns its place when it happened twice, when the user stated it as standing ("always", "never", "I prefer"), or when the wrong assumption would recur in any thread in this repo.
 - **It goes stale fast**: a branch name, a PR number, today's state of a service.
 - **A tool should enforce it.** If a lint rule, a hook or a test would catch it every time, propose that instead, and say so.
@@ -31,24 +31,24 @@ Drop a candidate when:
 
 The most specific place that's loaded when the rule matters:
 
-- **Project AGENTS.md or CLAUDE.md**: this repo's commands, conventions, paths and limits. Everyone who works here reads it, so only what the team would accept. Use whichever file the project treats as the main one (a CLAUDE.md that only imports AGENTS.md means AGENTS.md).
+- **Project AGENTS.md or CLAUDE.md**: this repo's commands, conventions, paths and limits, and only what the team would accept. Use whichever file the project treats as the main one (a CLAUDE.md that only imports AGENTS.md means AGENTS.md).
 - **The user's global instructions**: how this user works everywhere, like asking, commits, tone and PR style.
 - **A skill**: a step inside a procedure. Name the skill and the step. If the skill came from a plugin, an update overwrites its folder, so put the line in its settings file (`.agents/<skill>.md`) or suggest it upstream.
 - **Memory**: a fact about the user or their setup that isn't a rule ("the test database needs `make db-up` first"). Only if the host has a memory feature.
 
 ## 4. Write the proposals
 
-Write each one as the line itself, in the voice and format of the file it goes into, and ready to paste. Under it, say why (the quote, and how many times it came up) and where (the file and section). Keep it to the best seven at most. If nothing survives the filter, say "Nothing new: the instructions already cover what came up," and stop.
+Write each one as the line itself, in the voice and format of the file it goes into, ready to paste. Under it, say why (the quote, and how many times it came up) and where (the file and section). Keep the best seven at most. Use the example's format, with the dropped candidates on one last line. If nothing survives the filter, say "Nothing new: the instructions already cover what came up," and stop.
 
 ## 5. Ask once
 
-Ask which to keep in one call: one question per home, multiSelect, with up to four lines each (AskUserQuestion in Claude Code; otherwise one message with numbered proposals and "reply with the numbers to keep"). Use the `ask` skill if it's installed. Put the line you'd most recommend first in each question. In an unattended run, write nothing. List the proposals under "Needs you".
+Ask which to keep in one call: one question per home, multiSelect, with up to four lines each (AskUserQuestion in Claude Code, otherwise one message with numbered proposals and "reply with the numbers to keep"). A home with one proposal gets Keep and Skip as its options. Put the line you'd most recommend first in each question. Use the `ask` skill if it's installed. In an unattended run, don't ask and write nothing. List the proposals under "Needs you".
 
 ## 6. Write the approved lines
 
 - Read the target file fresh. Put the line in the section it belongs to, and match the wording around it. Don't reformat anything else.
 - If a line replaces an existing one, edit that line rather than adding a near-duplicate.
-- Don't commit. Project files show up in the diff for the user to commit; global instructions and memory aren't in the repo.
+- Don't commit. Project files show up in the diff for the user to commit. Global instructions and memory aren't in the repo.
 - Report each line you wrote with its `file:line`.
 
 ## Example
