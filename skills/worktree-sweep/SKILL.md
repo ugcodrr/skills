@@ -46,7 +46,7 @@ Each group's line says what it holds. A group whose command is `none` is never d
 Temporary refs get a command, grouped by prefix: `refs/pr`, `refs/backup`, `refs/fold-backup/<stamp>`, `refs/original` (left by history rewrites) and any prefix in `tempRefs`.
 
 - `refs/pr/<n>` refs are PR heads fetched by the merge-train skill. GitHub still has those.
-- "Only copy" means no branch, tag or remote-tracking ref has that commit, so deleting the ref loses it for good at the next garbage collection.
+- "Only copy" means no branch, tag or remote-tracking ref has that commit, so deleting the ref would lose it for good at the next garbage collection. The command never takes those refs: they count as held back. If the user still wants one gone, give them `git update-ref -d <ref>` to run themselves.
 - Other refs show with no command, since a tool may keep live state there (T3 Code's `refs/t3`, Gerrit's `refs/changes`).
 
 ## 3. Check who owns each worktree
@@ -75,7 +75,7 @@ Ask which groups to delete in one question (AskUserQuestion with multiSelect in 
 
 - Recommend the merged groups and `refs/pr`.
 - Offer `worktrees/unmerged` and `branches/pushed` only as "if that work is abandoned".
-- Offer any other ref group with its count of only copies, and don't recommend one that has any.
+- Offer any other ref group with a command, and name its held-back only copies in the report.
 - Never offer a group without a command.
 
 ## 5. Delete what the user approved

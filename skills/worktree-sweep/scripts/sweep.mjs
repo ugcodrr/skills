@@ -2,7 +2,7 @@
 // Lists this repo's worktrees, local branches and temporary refs whose work is done or safe to drop, in
 // groups, with one delete command per group. Read-only: it deletes nothing. A group's command takes only its
 // safe items: never a dirty, locked, kept or recently touched worktree, a checked-out branch, or a branch
-// with commits no remote has.
+// with commits no remote has, or a ref holding the only copy of a commit.
 //
 //   node sweep.mjs                 one line per group, with its command
 //   node sweep.mjs --all           every item in every group
@@ -282,11 +282,11 @@ if (!opts.list || opts.list.startsWith("refs/")) {
     const id = parts.slice(0, parts.length > 3 ? 3 : 2).join("/");
     const only = Number(git("rev-list", "--count", sha, "--not", "--branches", "--remotes", "--tags")) > 0;
     if (!refGroups.has(id)) refGroups.set(id, []);
-    refGroups.get(id).push({ name: ref, row: [ref, short(sha), only ? "only copy" : "kept elsewhere too"], takes: isTemp(ref), only });
+    refGroups.get(id).push({ name: ref, row: [ref, short(sha), only ? "only copy" : "kept elsewhere too"], takes: isTemp(ref) && !only, temp: isTemp(ref), only });
   }
   for (const [id, items] of refGroups) {
     const only = items.filter((item) => item.only).length;
-    const temp = items.every((item) => item.takes);
+    const temp = items.every((item) => item.temp);
     groups.push({
       id,
       title: only ? `${only} hold the only copy of a commit` : "every commit is kept elsewhere too",
