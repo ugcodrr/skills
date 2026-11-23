@@ -1,14 +1,12 @@
-<img src="assets/icon.svg" width="64" height="64" alt="">
-
 # skills
 
-The agent skills I use every day, mostly with Claude Code and Codex inside [T3 Code](https://t3.codes). Each one is a folder with a `SKILL.md`, small enough to read in a few minutes and change to fit how you work. None of them need T3 Code: where a host has a better tool, the skill says so and gives the fallback.
+Agent skills I use every day, mostly with Claude Code and Codex in [T3 Code](https://t3.codes). Each one is a folder with a `SKILL.md`, short enough to read in a few minutes and change to fit how you work. None of them need T3 Code. Where a host has a better tool, the skill says so and gives the fallback.
 
 ## Install
 
-Claude Code, one plugin per area. Add the marketplace, then install the ones you want:
+In Claude Code, add the marketplace, then install the plugins you want:
 
-```bash
+```text
 /plugin marketplace add ugcodrr/skills
 /plugin install threads@ugcodrr-skills
 /plugin install prs@ugcodrr-skills
@@ -16,15 +14,13 @@ Claude Code, one plugin per area. Add the marketplace, then install the ones you
 /plugin install skill-tools@ugcodrr-skills
 ```
 
-On recent Claude Code, `/plugin install threads --marketplace ugcodrr/skills` does both steps at once.
-
-Any other agent ([skills.sh](https://skills.sh) supports Codex, Cursor, OpenCode and more, and lets you pick single skills):
+For any other agent, [skills.sh](https://skills.sh) installs all of them or just the ones you pick, in Codex, Cursor, OpenCode and more:
 
 ```bash
 npx skills add ugcodrr/skills
 ```
 
-Or copy a folder from `skills/` into `~/.claude/skills/` (or your agent's skills folder) and edit it.
+Or copy a folder from `skills/` into `~/.claude/skills/`, or your agent's skills folder, and edit it.
 
 ## Skills
 
@@ -49,7 +45,7 @@ Or copy a folder from `skills/` into `~/.claude/skills/` (or your agent's skills
 
 | Skill | Use it when |
 | --- | --- |
-| [self-review](skills/self-review/SKILL.md) | You're about to hand back or push a branch. It runs verify and a diff checker, then reads the diff for what a script can't judge, until it's clean. |
+| [self-review](skills/self-review/SKILL.md) | You're about to hand back or push a branch and want verify, a diff checker and a read of the diff run until it's clean. |
 | [maintainer-bar](skills/maintainer-bar/SKILL.md) | Your open PRs need to meet a named maintainer's bar before they get to them. |
 | [review-replies](skills/review-replies/SKILL.md) | Reviewers commented on your PRs and you want fixes committed and replies drafted for you to post. It never posts. |
 | [focus-session](skills/focus-session/SKILL.md) | A set of PRs or a local stack each need your call, with a cleanup and a correctness review behind every question. |
@@ -64,7 +60,7 @@ Or copy a folder from `skills/` into `~/.claude/skills/` (or your agent's skills
 
 | Skill | Use it when |
 | --- | --- |
-| [gridlines](skills/gridlines/SKILL.md) | A layout looks off at the edges. It draws guide lines, finds what misses them, and fixes the container padding. |
+| [gridlines](skills/gridlines/SKILL.md) | A layout looks off at the edges and you want guide lines drawn, the misses found and the padding fixed. |
 | [design-hillclimb](skills/design-hillclimb/SKILL.md) | A screen or rendered image needs a measured design pass: one defect at a time, a blind judge, then keep, A/B or drop. |
 | [pr-visuals](skills/pr-visuals/SKILL.md) | A PR changes what users see in a web app and needs framed before/after screenshots. |
 
@@ -75,11 +71,9 @@ Or copy a folder from `skills/` into `~/.claude/skills/` (or your agent's skills
 | [skill-lint](skills/skill-lint/SKILL.md) | You're about to publish or commit a skill and want it checked against the style guide. |
 | [skill-from-thread](skills/skill-from-thread/SKILL.md) | A thread finally got something working and you want it saved as a skill. |
 
-[docs/ROADMAP.md](docs/ROADMAP.md) lists what's next.
-
 ## Settings
 
-Skills that need your project's details (a verify command, a maintainer's bar, the probes to compare) read them from `.agents/<skill>.md` or `.agents/<skill>.json` in the project, or `~/.agents/` for settings you want everywhere. Each one ships an example in its `references/` folder and works without it where it can. They live outside the skill folder, so updating a plugin never overwrites them.
+Skills that need your project's details, like a verify command, a maintainer's bar or the probes to compare, read them from `.agents/<skill>.md` or `.agents/<skill>.json` in the project, or from `~/.agents/` for settings you want everywhere. Most ship an example in their `references/` folder and work without one where they can. Settings live outside the skill folder, so updating a plugin never overwrites them.
 
 ## How they're written
 
@@ -89,6 +83,8 @@ Every skill here follows [docs/STYLE.md](docs/STYLE.md). The short version:
 - The body is a procedure, not an essay. Steps, rules and one example of the output.
 - Anything deterministic goes in a script: plain Node, no dependencies. Long reference material goes in `references/`.
 - Each skill is read-only or asks before it does anything you can't undo.
+
+[docs/ROADMAP.md](docs/ROADMAP.md) lists what's next.
 
 ## License
 
