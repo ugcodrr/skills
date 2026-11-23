@@ -1,0 +1,25 @@
+{
+  "setup": "npm ci",
+  "build": "rm -rf dist && npm run build",
+  "inputs": "test/fixtures",
+  "env": { "LANG": "en_US.UTF-8" },
+  "probes": [
+    { "name": "help", "run": "node dist/cli.js --help" },
+    {
+      "name": "report",
+      "kind": "json",
+      "run": "node --import \"$DIFF_PROOF_FREEZE\" dist/cli.js report \"$DIFF_PROOF_INPUTS/orders.csv\" --format json"
+    },
+    {
+      "name": "charts",
+      "kind": "files",
+      "run": "node --import \"$DIFF_PROOF_FREEZE\" scripts/render-charts.mjs --in \"$DIFF_PROOF_INPUTS\" --out \"$DIFF_PROOF_OUT\""
+    },
+    {
+      "name": "report-speed",
+      "kind": "timing",
+      "runs": 10,
+      "run": "node dist/cli.js report \"$DIFF_PROOF_INPUTS/orders.csv\" > /dev/null"
+    }
+  ]
+}

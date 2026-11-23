@@ -1,0 +1,18 @@
+{
+  "verify": "npm run lint && npm test",
+  "protected": [
+    { "glob": "migrations/**", "reason": "applied migrations never change; add a new one" },
+    { "glob": "AGENTS.md", "reason": "the team edits the agent rules by hand" },
+    "vendor/"
+  ],
+  "licenseHeader": {
+    "pattern": "Copyright \\(c\\) Acme Inc\\.",
+    "files": ["src/**/*.ts", "src/**/*.tsx"]
+  },
+  "deny": [
+    { "pattern": "internal\\.acme\\.corp", "message": "internal hostname; read it from config.apiHost" },
+    { "pattern": "from [\"']lodash[\"']", "message": "lodash isn't a dependency; use the helpers in src/util" }
+  ],
+  "americanSpelling": true,
+  "commentBlockLines": 2
+}

@@ -1,0 +1,6 @@
+{
+  "verify": "npm ci && npm run lint && npm test",
+  "author": "@me",
+  "botAuthors": ["acme-release-bot", "acme-translations"],
+  "lockfiles": ["package-lock.json", "Cargo.lock", "schema.lock"]
+}

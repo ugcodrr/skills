@@ -1,0 +1,4 @@
+{
+  "repos": ["~/src/acme-api", "~/src/acme-web", "~/src/dotfiles"],
+  "ignoreChecks": ["^Vercel$", "^codecov/patch$"]
+}

@@ -1,0 +1,20 @@
+{
+  "now": "2026-01-15T09:30:00Z",
+  "shots": [
+    { "name": "settings", "path": "/settings", "title": "Settings" },
+    {
+      "name": "settings-mobile-dark",
+      "path": "/settings",
+      "viewport": { "width": 390, "height": 844 },
+      "colorScheme": "dark"
+    },
+    {
+      "name": "delete-dialog",
+      "path": "/projects/1",
+      "selector": "[role=dialog]",
+      "prep": [{ "click": "text=Delete project" }, { "waitFor": "[role=dialog]" }],
+      "after": { "prep": [{ "click": "text=Delete this project" }, { "waitFor": "[role=dialog]" }] }
+    },
+    { "name": "billing-banner", "path": "/billing", "selector": ".banner", "only": "after" }
+  ]
+}

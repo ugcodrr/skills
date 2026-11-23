@@ -1,0 +1,14 @@
+{
+  "recentDays": 3,
+  "keep": [
+    "/docs-preview$",
+    "^release/"
+  ],
+  "buildOutput": [
+    "^\\.env\\.local$",
+    "(^|/)_site/"
+  ],
+  "tempRefs": [
+    "refs/review/"
+  ]
+}

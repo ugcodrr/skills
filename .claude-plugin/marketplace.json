@@ -1,0 +1,64 @@
+{
+  "name": "ugcodrr-skills",
+  "owner": {
+    "name": "ugcodrr"
+  },
+  "metadata": {
+    "description": "Agent skills I use every day",
+    "version": "0.2.0"
+  },
+  "plugins": [
+    {
+      "name": "threads",
+      "description": "Running agent threads well: settle, handoff, receipts, retro, unattended runs, an inbox across threads, asking good questions, second opinions, friction logs, context audits, parallel threads and worktree cleanup",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/settle",
+        "./skills/handoff",
+        "./skills/receipts",
+        "./skills/retro",
+        "./skills/unattended",
+        "./skills/inbox",
+        "./skills/ask",
+        "./skills/second-opinion",
+        "./skills/hiccups",
+        "./skills/context-audit",
+        "./skills/split-threads",
+        "./skills/worktree-sweep"
+      ]
+    },
+    {
+      "name": "prs",
+      "description": "Branches and pull requests: self-review, a maintainer's bar, review replies, focus sessions, merge trains, output proofs, perf reviews, PR descriptions, commit splitting and plain-language diffs",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/self-review",
+        "./skills/maintainer-bar",
+        "./skills/review-replies",
+        "./skills/focus-session",
+        "./skills/merge-train",
+        "./skills/diff-proof",
+        "./skills/perf-review",
+        "./skills/pr-describe",
+        "./skills/commit-split",
+        "./skills/explain-diff"
+      ]
+    },
+    {
+      "name": "design",
+      "description": "Interface polish: gridline alignment passes, measured design hillclimbs and before/after PR screenshots",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/gridlines", "./skills/design-hillclimb", "./skills/pr-visuals"]
+    },
+    {
+      "name": "skill-tools",
+      "description": "Writing skills: lint them against the style guide, and draft new ones from threads that worked",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/skill-lint", "./skills/skill-from-thread"]
+    }
+  ]
+}
