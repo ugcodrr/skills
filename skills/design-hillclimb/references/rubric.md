@@ -13,7 +13,7 @@ Two kinds of surface, scored separately:
   - a change to visible information, behavior or an owner convention;
   - a dependency;
   - a shared component's contract.
-- **Everything renders offline from frozen inputs.** Freeze the inputs and the baseline before editing. No network, nothing published, nothing in production.
+- **Everything renders offline from frozen inputs.** No network, nothing published, nothing in production. No personal names or ids in captions or ledgers.
 
 ## Owner calls
 
@@ -119,7 +119,6 @@ Every 0 or 1 names a region and one concrete reason. A metric is evidence, not t
   - Each role has its anchor: the cell center for centered numbers, the right edge in a numeric list, the text start after the icon in an item list. Shadows and ascenders aren't baselines. Compare value baselines, not the tops of wrapped titles.
   - Tolerance: 2 native px on images, 1 CSS px on pages.
   - **Stagger:** stacked item cells (name over value) that a wider sibling centers stagger their icons and text starts from row to row. Measure each column's icon x and text-start x across rows. Holding the cell's content to the left fixes it.
-  - On pages, the `gridlines` skill draws these lines and lists the misses, if it's installed.
 - **R5:** measure outer panel gaps apart from text gaps and hit areas. Repeated instances of one component that spread more than 2 native px or 1 CSS px without a reason are flagged. Keep deliberate grouping gaps. No glyphs or edges that newly touch, no groups that merge. "All gaps equal" can erase hierarchy.
 - **R6:** compare at equal display width. A spread over 20% in one role's displayed cap height triggers review, unless the role has a declared variant. Equal widths alone earn nothing.
 - **R7:**
@@ -147,37 +146,21 @@ These send you to look. A rise in one never rejects a keep on its own, and a fal
 - **Pages:** the route matrix at both viewports, plus viewport crops where a section starts mid-page.
 - **Averaging:** fixtures within a state, then states within a variant, then variants within a surface. Report images and pages apart, and phone and desktop apart, so many empty cases can't swamp the rest. Report outlier fixtures apart. Also report each case's vector and the worst changed case.
 
-## The hillclimb, per candidate
+## Keep, option or drop
 
-1. **Freeze:** the revision, build, assets and fonts, fixture hashes, seed, clock, viewport, pixel ratio, capture state and dynamic masks. Baseline the matrix, score it and register the existing violations. Set the attempt and time budget first.
-2. **Name one defect** (an open target, or one the baseline finds) and a hypothesis that could be proved wrong. Local changes first. A minimal paired parent-and-child change counts as one hypothesis; unrelated fixes are separate candidates.
-3. **Check:** first confirm the change alters its target case at all (a shared rule can pass a whole matrix without ever firing). Then render the whole dependency scope and compare matched cases: full images, native crops and display-size views. Run the gates, the measurements and the same recognition tasks. Write down missing evidence.
-4. **Decide:**
-   - **Provisional keep:** a targeted criterion goes up a full step, no criterion falls on any case, the averaged mean rises, and every relevant gate has evidence.
-   - **Option:** a useful trade-off, a change to an owner convention, a screen past the height ceiling, a tie, or missing evidence.
-   - **Drop:** an unsupported gain, a new violation, or worse evidence. Never average away a regression.
-5. **Judge:** an independent reviewer that doesn't know the author, the score claims or the A/B order scores the complete matched evidence against this rubric. Resolve disagreements by looking at the cited region; unresolved taste trade-offs become options. An objection on one state is often fixed by making the change count-driven, after which that state must render byte-identical to its baseline. Judge provisional keeps before stacking dependent work on them.
-6. **Stop:** on success (the targeted defects fixed, no relevant score at 0, the evidence complete), at the budget, or after three distinct hypotheses fail. Report what's left.
+Decide each candidate after the gates, the measurements and the recognition tasks have run on its whole dependency scope:
+
+- **Provisional keep:** a targeted criterion goes up a full step, no criterion falls on any case, the averaged mean rises, and every relevant gate has evidence. It becomes a keep when a blind judge agrees.
+- **Option:** a useful trade-off, a change to an owner convention, a screen past the height ceiling, a tie, or missing evidence.
+- **Drop:** an unsupported gain, a new violation, or worse evidence. Never average away a regression.
 
 ## Guarding against score gaming
 
 - **Bigger, darker or busier** doesn't earn space points.
-- **Deleting zeros, footnotes or rows** is an information change.
-- **Shrinking text or hit areas** is blocked by the size floors.
 - **Stretching boxes across independent groups** earns nothing. Row-mates ending level earns R2 only where a hole was visible.
-- **Narrowing by growing tall** is capped by the height ceiling.
 - **One fixture's gain never pays for another's loss.** Trade-offs become options.
 - **One root cause gets one credit,** even when several measurements move.
 - **Changing the inputs or the capture framing** voids the comparison. Hash them.
 - **Rescoring drifts:** freeze anchor examples and written reasons before trying changes, and never edit an earlier score.
 - **The judge must cite a visible defect,** not a preference, and sees sharp full-size crops as well as contact sheets.
 - **A data bug found along the way** is recorded separately, not fixed inside a design pass.
-
-## Morning sheet
-
-One offline HTML page:
-- matched before and after at display size, native crops, full coverage, criterion vectors, changed regions and sizes;
-- gate evidence, the registered baseline violations, the missing checks, and the unchanged negative controls;
-- options as A/B, each with one concrete trade-off, saying whether it changes information, behavior or an owner call.
-
-Each pair says which region to look at and which side is today. An idea comes with a rendered attempt or a marked crop, never only today's picture, since an idea can't be judged from today's picture alone. No personal names or ids in captions or ledgers. The owner approves before anything is merged, folded or pushed.
