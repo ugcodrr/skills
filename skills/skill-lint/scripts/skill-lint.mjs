@@ -121,6 +121,10 @@ function lintSkill(dir) {
   }
 
   const description = meta.description ?? "";
+  const rawIndex = lines.slice(0, end).findIndex((line) => line.startsWith("description:"));
+  const raw = rawIndex === -1 ? "" : lines[rawIndex].slice("description:".length).trim();
+  if (raw && !/^["'>|]/.test(raw) && /: | #/.test(raw))
+    report("ERROR", file, rawIndex + 1, 'unquoted description has ": " or " #", which YAML misreads, so the skill won\'t load. Quote it or reword');
   if (!description) report("ERROR", file, 2, "frontmatter has no description");
   else {
     if (description.length > MAX_DESCRIPTION)
